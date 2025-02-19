@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wii Menu</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: black; /* Set background color to black */
+            cursor: url('assets/PointerP1.png') 32 32, auto; /* Set custom cursor with hotspot */
+        }
+        #top-image-container {
+            position: absolute;
+            top: 0;
+            left: -0.4%;
+            width: 201%;
+            height: 105.6%;
+            background: url('assets/wiibackground.png') repeat-x;
+            background-size: 100vw 100%; /* Set the size of each background image before it tessellates */
+        }
+        .bottom-image {
+            width: 100%;
+            margin-top: auto;
+        }
+        .slide-left {
+            animation: slideLeft 0.5s forwards;
+        }
+        .slide-right {
+            animation: slideRight 0.5s forwards;
+        }
+        @keyframes slideLeft {
+            from {
+                transform: translateX(0);
+            }
+            to {
+                transform: translateX(-49.5%);
+            }
+        }
+        @keyframes slideRight {
+            from {
+                transform: translateX(-49.5%);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+        .arrow {
+            position: absolute;
+            top: 40%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            width: 100px; /* Slightly larger size */
+            height: 100px; /* Slightly larger size */
+            animation: moveLeftRight 1s infinite alternate; /* Faster animation */
+        }
+        #left-arrow {
+            left: 10px;
+            display: none; /* Initially hidden */ 
+        }
+        #right-arrow {
+            right: 10px;
+        }
+        .plus-icon, .minus-icon {
+            position: absolute;
+            top: 40%; /* Align with the arrows */
+            transform: translateY(-50%);
+            width: auto;
+            height: 12%; /* Size of the plus and minus icons */
+            animation: moveLeftRight 1s infinite alternate; /* Faster animation */
+            opacity: 0; /* Initially hidden */
+            transition: opacity 0.3s; /* Smooth transition */
+        }
+        #plus-icon {
+            right: 4%; /* Position the plus icon to the left of the right arrow */
+        }
+        #minus-icon {
+            left: 4%; /* Position the minus icon to the right of the left arrow */
+        }
+        @keyframes moveLeftRight {
+            0% {
+                transform: translateY(-50%) translateX(0);
+            }
+            100% {
+                transform: translateY(-50%) translateX(10px);
+            }
+        }
+        #clock {
+            position: absolute;
+            bottom: 15%; /* Position the clock 15% from the bottom */
+            display: flex;
+            align-items: center;
+        }
+        .digit {
+            width: 60px; /* Slightly larger width of each number image */
+            filter: brightness(0) invert(0.5); /* Change the color to gray */
+            margin: 0 -5px; /* Closer spacing between digits */
+        }
+        .ampm {
+            width: 50px; /* Smaller width of am/pm image */
+            filter: brightness(0) invert(0.5); /* Change the color to gray */
+        }
+        @keyframes blink {
+            0%, 50% {
+                opacity: 1;
+            }
+            50.01%, 100% {
+                opacity: 0;
+            }
+        }
+        .blink {
+            animation: blink 1s step-start infinite;
+        }
+        #right-arrow:hover ~ #plus-icon {
+            opacity: 1;
+        }
+        #left-arrow:hover ~ #minus-icon {
+            opacity: 1;
+        }
+        #sdcard {
+            position: absolute;
+            bottom: 3.8%;
+            left: 18.4%;
+            width: 4.4%;
+            height: auto;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        #sdcard:hover {
+            transform: scale(1.2);
+        }
+        @keyframes flash {
+            0%, 100% {
+                filter: brightness(1);
+            }
+            50% {
+                filter: brightness(3);
+            }
+        }
+        .flash {
+            animation: flash 0.5s;
+        }
+    </style>
+</head>
+<body>
+    <div id="top-image-container"></div>
+    <img src="assets/bottomborder.png" alt="Bottom Image" class="bottom-image">
+    <img src="assets/leftarrow.png" alt="Left Arrow" id="left-arrow" class="arrow">
+    <img src="assets/rightarrow.png" alt="Right Arrow" id="right-arrow" class="arrow">
+    <img src="assets/plus.png" alt="Plus Icon" id="plus-icon" class="plus-icon">
+    <img src="assets/minus.png" alt="Minus Icon" id="minus-icon" class="minus-icon">
+    <div id="clock"></div>
+    <img src="assets/sdcard.png" alt="SD Card" id="sdcard">
+    <script>
+        document.getElementById('right-arrow').addEventListener('click', function() {
+            const container = document.getElementById('top-image-container');
+            container.classList.remove('slide-right');
+            container.classList.add('slide-left');
+            document.getElementById('right-arrow').style.display = 'none';
+            document.getElementById('left-arrow').style.display = 'block';
+        });
+
+        document.getElementById('left-arrow').addEventListener('click', function() {
+            const container = document.getElementById('top-image-container');
+            container.classList.remove('slide-left');
+            container.classList.add('slide-right');
+            document.getElementById('left-arrow').style.display = 'none';
+            document.getElementById('right-arrow').style.display = 'block';
+        });
+
+        function updateClock() {
+            const clockContainer = document.getElementById('clock');
+            clockContainer.innerHTML = ''; // Clear the current clock display
+            
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = now.getMinutes();
+            const ampm = hours >= 12 ? 'pm' : 'am';
+            
+            hours = hours % 12;
+            hours = hours ? hours : 12; // The hour '0' should be '12'
+            
+            const timeString = ('0' + hours).slice(-2) + ('0' + minutes).slice(-2);
+            
+            for (let i = 0; i < timeString.length; i++) {
+                const digit = timeString[i];
+                const img = document.createElement('img');
+                img.src = `numbers/${digit}.png`;
+                img.classList.add('digit');
+                clockContainer.appendChild(img);
+                if (i === 1) {
+                    const semicolon = document.createElement('img');
+                    semicolon.src = 'numbers/semicolon.png';
+                    semicolon.classList.add('digit', 'blink');
+                    clockContainer.appendChild(semicolon);
+                }
+            }
+
+            const ampmImg = document.createElement('img');
+            ampmImg.src = `numbers/${ampm}.png`;
+            ampmImg.classList.add('ampm');
+            clockContainer.appendChild(ampmImg);
+        }
+
+        setInterval(updateClock, 1000);
+        updateClock(); // Initial call to set the clock immediately
+
+        document.getElementById('sdcard').addEventListener('click', function() {
+            this.classList.add('flash');
+            setTimeout(() => this.classList.remove('flash'), 500); // Remove the class after the animation
+        });
+    </script>
+</body>
+</html>
